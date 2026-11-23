@@ -1,48 +1,46 @@
 export function drawGlossBall(ctx, tier, r, center) {
   ctx.save();
 
-  // 1. Outer Dark Neon Glow
-  const glow = ctx.createRadialGradient(center, center, r * 0.7, center, center, r * 1.3);
-  glow.addColorStop(0, tier.glow + '55');
-  glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = glow;
+  // 1. Outer soft glow aura
+  const padding = Math.max(4, Math.round(r * 0.15));
+  const aura = ctx.createRadialGradient(center, center, r * 0.75, center, center, r + padding - 1);
+  aura.addColorStop(0, tier.glow);
+  aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = aura;
   ctx.beginPath();
-  ctx.arc(center, center, r * 1.3, 0, Math.PI * 2);
+  ctx.arc(center, center, r + padding - 1, 0, Math.PI * 2);
   ctx.fill();
 
-  // 2. 3D Spherical Radial Body
-  const sphere = ctx.createRadialGradient(
-    center - r * 0.35,
-    center - r * 0.35,
-    r * 0.08,
+  // 2. Spherical radial gradient body (authentic 3D shiny candy glass sphere)
+  const body = ctx.createRadialGradient(
+    center - r * 0.25,
+    center - r * 0.25,
+    Math.max(1, r * 0.05),
     center,
     center,
     r
   );
-  sphere.addColorStop(0, '#ffffff');
-  sphere.addColorStop(0.2, tier.color);
-  sphere.addColorStop(0.85, '#0d0d1e');
-  sphere.addColorStop(1, '#050508');
-
-  ctx.fillStyle = sphere;
+  body.addColorStop(0, '#ffffff');
+  body.addColorStop(0.35, tier.color);
+  body.addColorStop(1, tier.glow);
+  ctx.fillStyle = body;
   ctx.beginPath();
   ctx.arc(center, center, r, 0, Math.PI * 2);
   ctx.fill();
 
-  // 3. Crisp Metallic Edge Light
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.lineWidth = Math.max(1.5, r * 0.07);
-  ctx.stroke();
+  // 3. Specular glass gloss reflection
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.44)';
+  ctx.beginPath();
+  ctx.arc(center - r * 0.35, center - r * 0.35, r * 0.28, 0, Math.PI * 2);
+  ctx.fill();
 
-  // 4. Modern Cyber Typography
-  const fontSize = Math.max(10, Math.round(r * 0.46));
-  ctx.font = `800 ${fontSize}px "Outfit", system-ui, sans-serif`;
+  // 4. Clean bold typography
+  ctx.fillStyle = '#07090e';
+  const fontSize = Math.max(9, Math.round(r * 0.46));
+  ctx.font = `900 ${fontSize}px "Outfit", system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = tier.glow;
-  ctx.shadowBlur = 6;
-  ctx.fillText(tier.name, center, center);
+  ctx.fillText(tier.name, center, center + 1);
 
   ctx.restore();
 }

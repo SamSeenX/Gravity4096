@@ -4,6 +4,7 @@
 @import './hud.css';
 @import './modal.css';
 @import './tutorial.css';
+@import './promo.css';
 
 * {
   margin: 0;

@@ -8,6 +8,7 @@ import { MilestoneModal } from './ui/milestoneModal.js';
 import { HighScoreModal } from './ui/highScoreModal.js';
 import { ComboBadge } from './ui/comboBadge.js';
 import { TutorialController } from './game/tutorial.js';
+import { initCrossPromo } from './ui/crossPromo.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   initErrorBoundary();
@@ -29,6 +30,8 @@ window.addEventListener('DOMContentLoaded', () => {
   new HighScoreModal(viewport);
   new GameOverModal(viewport, () => engine.reset());
   new TutorialController(viewport);
+
+  initCrossPromo();
 
   window.addEventListener('resize', () => {
     engine.initLayout();

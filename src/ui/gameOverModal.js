@@ -1,5 +1,6 @@
 import { store } from '../core/store.js';
 import { eventBus } from '../core/eventBus.js';
+import { renderCrossPromo } from './crossPromo.js';
 
 export class GameOverModal {
   constructor(container, onReplay) {
@@ -8,6 +9,7 @@ export class GameOverModal {
     this.modalEl = null;
     this.scoreValEl = null;
     this.bestValEl = null;
+    this.promoEl = null;
     this.render();
     this.bind();
   }
@@ -30,6 +32,7 @@ export class GameOverModal {
             <span class="stat-value" id="modalRecordScore">0</span>
           </div>
         </div>
+        <div class="promo-placeholder" id="gameOverPromo"></div>
         <button class="primary-btn" id="modalReplayBtn">LAUNCH AGAIN 🚀</button>
       </div>
     `;
@@ -37,6 +40,7 @@ export class GameOverModal {
 
     this.scoreValEl = this.modalEl.querySelector('#modalFinalScore');
     this.bestValEl = this.modalEl.querySelector('#modalRecordScore');
+    this.promoEl = this.modalEl.querySelector('#gameOverPromo');
   }
 
   bind() {
@@ -45,6 +49,7 @@ export class GameOverModal {
         const state = store.getState();
         if (this.scoreValEl) this.scoreValEl.textContent = state.score;
         if (this.bestValEl) this.bestValEl.textContent = state.bestScore;
+        if (this.promoEl) renderCrossPromo(this.promoEl);
         this.modalEl.classList.remove('hidden');
       } else {
         this.modalEl.classList.add('hidden');

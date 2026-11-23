@@ -1,6 +1,7 @@
 import { eventBus } from '../core/eventBus.js';
 import { audioManager } from '../audio/sound.js';
 import { fireCelebrationConfetti, stopCelebrationConfetti } from './confetti.js';
+import { renderCrossPromo } from './crossPromo.js';
 
 export class HighScoreModal {
   constructor(container) {
@@ -8,6 +9,7 @@ export class HighScoreModal {
     this.modalEl = null;
     this.canvasEl = null;
     this.scoreEl = null;
+    this.promoEl = null;
     this.hasCelebrated = false;
     this.render();
     this.bind();
@@ -27,6 +29,7 @@ export class HighScoreModal {
           <span class="stat-label">RECORD SCORE</span>
           <span class="stat-value" id="highScoreModalVal">0</span>
         </div>
+        <div class="promo-placeholder" id="highScorePromo"></div>
         <button class="primary-btn" id="highScoreContinueBtn">KEEP GOING 🚀</button>
       </div>
     `;
@@ -34,6 +37,7 @@ export class HighScoreModal {
 
     this.canvasEl = this.modalEl.querySelector('#highScoreConfettiCanvas');
     this.scoreEl = this.modalEl.querySelector('#highScoreModalVal');
+    this.promoEl = this.modalEl.querySelector('#highScorePromo');
   }
 
   bind() {
@@ -42,6 +46,7 @@ export class HighScoreModal {
       this.hasCelebrated = true;
 
       if (this.scoreEl) this.scoreEl.textContent = score;
+      if (this.promoEl) renderCrossPromo(this.promoEl);
       this.modalEl.classList.remove('hidden');
       audioManager.playVictory();
       fireCelebrationConfetti(this.canvasEl);
