@@ -1,5 +1,5 @@
 const STORAGE_KEY_BEST = 'gravity4096_best';
-const STORAGE_KEY_STATE = 'gravity4096_state';
+const STORAGE_KEY_STATE = 'gravity4096_saved_state';
 
 export const storage = {
   getBestScore() {
@@ -17,35 +17,24 @@ export const storage = {
     } catch {}
   },
 
-  exportBackup() {
+  getGameState() {
     try {
-      const data = {
-        bestScore: this.getBestScore(),
-        timestamp: Date.now()
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `gravity4096_backup_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      return true;
+      const raw = localStorage.getItem(STORAGE_KEY_STATE);
+      return raw ? JSON.parse(raw) : null;
     } catch {
-      return false;
+      return null;
     }
   },
 
-  importBackup(jsonString) {
+  setGameState(state) {
     try {
-      const data = JSON.parse(jsonString);
-      if (typeof data.bestScore === 'number') {
-        this.setBestScore(data.bestScore);
-        return { success: true, bestScore: data.bestScore };
-      }
-      return { success: false, error: 'Invalid backup format' };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
+      localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state));
+    } catch {}
+  },
+
+  clearGameState() {
+    try {
+      localStorage.removeItem(STORAGE_KEY_STATE);
+    } catch {}
   }
 };

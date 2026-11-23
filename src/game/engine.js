@@ -1,17 +1,16 @@
-import { Ball } from './ball.js';
 import { GalaxyCore } from './galaxyCore.js';
 import { Renderer } from './renderer.js';
 import { InputHandler } from './input.js';
 import { FloatingScore } from './particle.js';
 import { resolveCollisions } from './orbitalPhysics.js';
 import { updateEngineCharge } from './engineCharge.js';
+import { executeShoot } from './engineShoot.js';
 import { getRandomSpawnTier, updateDangerStatus } from './spawner.js';
 import { spriteCache } from './spriteCache.js';
 import { calculateEngineLayout } from './engineLayout.js';
+import { saveGameState, restoreGameState, clearSavedGameState } from './stateStorage.js';
 import { TIERS } from '../config/tiers.js';
 import { store } from '../core/store.js';
-import { audioManager } from '../audio/sound.js';
-import { haptics } from '../audio/haptics.js';
 
 export class Engine {
   constructor(canvas) {
@@ -27,6 +26,7 @@ export class Engine {
     this.dangerTimer = 0;
     this.isWarning = false;
     this.canShoot = true;
+    this.isPaused = false;
 
     this.isAiming = false;
     this.aimPos = null;
@@ -35,6 +35,7 @@ export class Engine {
 
     this.initLayout();
     this.initInput();
+    this.initSessionSync();
     this.startLoop();
   }
 
@@ -43,47 +44,37 @@ export class Engine {
     Object.assign(this, layout);
     this.galaxyCore.resize(this.centerX, this.centerY, this.scale);
     this.renderer.initStars(this.width, this.height);
-    this.nextTier = getRandomSpawnTier(store.getState().highestTier);
+  }
+
+  initSessionSync() {
+    const hasRestored = restoreGameState(this);
+    if (!hasRestored) {
+      this.nextTier = getRandomSpawnTier(store.getState().highestTier);
+    }
+    window.addEventListener('beforeunload', () => saveGameState(this));
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) saveGameState(this);
+    });
   }
 
   initInput() {
     new InputHandler({
       canvas: this.canvas,
       onAim: (x, y) => this.handleAim(x, y),
-      onShoot: () => this.handleShoot()
+      onShoot: () => executeShoot(this)
     });
   }
 
-  handleAim(x, y) {
-    if (!this.canShoot || store.getState().isGameOver) return;
-    this.isAiming = true;
-    this.aimPos = { x, y };
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    if (this.isPaused) saveGameState(this);
+    return this.isPaused;
   }
 
-  handleShoot() {
-    if (!this.canShoot || !this.currentTrajectory || store.getState().isGameOver) {
-      this.isAiming = false;
-      this.chargeTimer = 0;
-      return;
-    }
-
-    this.canShoot = false;
-    this.isAiming = false;
-    const launchSpeed = (4.8 + this.chargeStrength * 8.4) * this.scale;
-    const vx = this.currentTrajectory.launchDir.x * launchSpeed;
-    const vy = this.currentTrajectory.launchDir.y * launchSpeed;
-
-    this.balls.push(new Ball(this.originX, this.originY, this.nextTier, false, vx, vy, this.scale));
-    audioManager.playLaunch();
-    haptics.launch();
-
-    this.nextTier = getRandomSpawnTier(store.getState().highestTier);
-    this.currentTrajectory = null;
-    this.chargeTimer = 0;
-
-    setTimeout(() => {
-      this.canShoot = true;
-    }, 450);
+  handleAim(x, y) {
+    if (!this.canShoot || store.getState().isGameOver || this.isPaused) return;
+    this.isAiming = true;
+    this.aimPos = { x, y };
   }
 
   handleMerge(tierIndex, x, y) {
@@ -91,10 +82,11 @@ export class Engine {
     store.addScore(points);
     store.setHighestTier(tierIndex + 1);
     this.floatingScores.push(new FloatingScore(x, y, `+${points}`, TIERS[tierIndex].color, this.scale));
+    saveGameState(this);
   }
 
   update() {
-    if (store.getState().isGameOver) return;
+    if (store.getState().isGameOver || this.isPaused) return;
 
     updateEngineCharge(this);
     this.galaxyCore.update();
@@ -132,7 +124,7 @@ export class Engine {
 
     this.galaxyCore.draw(this.ctx);
 
-    if (this.currentTrajectory && this.canShoot && this.isAiming) {
+    if (this.currentTrajectory && this.canShoot && this.isAiming && !this.isPaused) {
       const tier = TIERS[this.nextTier] || TIERS[0];
       this.renderer.drawTrajectory(this.currentTrajectory, tier.color);
     }
@@ -143,7 +135,11 @@ export class Engine {
 
     const nextTierConfig = TIERS[this.nextTier] || TIERS[0];
     const nextSprite = spriteCache.getSprite(this.nextTier, nextTierConfig.radius * this.scale);
-    this.renderer.drawLauncher(this.originX, this.originY, nextSprite, this.chargeStrength, this.isAiming);
+    this.renderer.drawLauncher(this.originX, this.originY, nextSprite, this.chargeStrength, this.isAiming && !this.isPaused);
+
+    if (this.isPaused) {
+      this.renderer.drawPauseOverlay(this.width, this.height, this.centerX, this.centerY);
+    }
   }
 
   startLoop() {
@@ -162,10 +158,12 @@ export class Engine {
     this.dangerTimer = 0;
     this.isWarning = false;
     this.canShoot = true;
+    this.isPaused = false;
     this.isAiming = false;
     this.chargeTimer = 0;
     this.currentTrajectory = null;
     this.nextTier = getRandomSpawnTier(0);
+    clearSavedGameState();
     store.reset();
   }
 }
