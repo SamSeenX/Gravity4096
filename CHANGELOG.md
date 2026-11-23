@@ -1,15 +1,9 @@
 # CHANGELOG.md
 
-## [1.0.0] - 2026-11-23
-### Added
-- Complete celestial orbital merge game engine (Gravity4096)
-- Central galaxy attractor with Plummer-softened gravity and tangential orbital swirl
-- N-body mutual soft gravity allowing celestial bodies to naturally form rotating clusters
-- Upward-aiming bottom launcher with interactive trajectory path projection and wall rebounds
-- Elastic collision resolution with impulse physics and boundary containment
-- 12 celestial tiers from Ceres (2) up to Black Hole (4096) with procedural offscreen canvas caching
-- Procedural Web Audio API sound synthesizer and navigator.vibrate haptic feedback
-- Decoupled reactive Store and EventBus architecture with localStorage persistence and JSON backup/restore
-- Responsive mobile-first UI with safe-area insets, HUD pills, and Game Over modal
-- 256x256 compact 1:1 OpenGraph preview and icon assets
-- Strict modular adherence to the 200-line rule across all source files
+## [1.0.1] - 2026-11-23
+### Changed
+- Increased central gravity constant from 0.32 to 38.0 in orbitalGravity.js and trajectory.js for realistic orbital capture
+- Added inner core repulsion buffer (34px) preventing singular point clumping at the black hole center
+- Dampened border bounce restitution from 0.65 to 0.35 and applied wall friction to prevent pinball ricochets
+- Extended aiming trajectory simulator to 42 steps for clear visual orbit projection
+- Relaxed danger limit in spawner.js: minimum 4 active balls required and filters out fast-moving bodies to prevent false-positive game overs

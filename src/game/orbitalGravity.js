@@ -1,6 +1,6 @@
-const G_CENTER = 0.32;
+const G_CENTER = 38.0;
 const SOFT_CENTER = 35;
-const SWIRL_DRIFT = 0.035;
+const SWIRL_DRIFT = 0.08;
 const G_MUTUAL = 0.045;
 const SOFT_MUTUAL = 28;
 const DRAG = 0.992;
@@ -8,11 +8,12 @@ const MAX_VELOCITY = 14;
 
 export function applyGravityForces(balls, centerX, centerY, scale = 1) {
   const n = balls.length;
+  const coreRepelDist = 34 * scale;
+
   for (let i = 0; i < n; i++) {
     const b = balls[i];
     if (b.toRemove || b.isMerging) continue;
 
-    // Central galaxy gravity with Plummer softening
     const dx = centerX - b.x;
     const dy = centerY - b.y;
     const distSq = dx * dx + dy * dy;
@@ -29,6 +30,13 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       // Tangential galaxy swirl
       b.vx += -ny * SWIRL_DRIFT * scale;
       b.vy += nx * SWIRL_DRIFT * scale;
+
+      // Gentle core repulsion to prevent singular dead-center collapse
+      if (dist < coreRepelDist) {
+        const repelForce = (1 - dist / coreRepelDist) * 0.45 * scale;
+        b.vx -= nx * repelForce;
+        b.vy -= ny * repelForce;
+      }
     }
 
     // Mutual soft gravity between celestial bodies

@@ -6,6 +6,8 @@ import { haptics } from '../audio/haptics.js';
 import { applyGravityForces } from './orbitalGravity.js';
 
 const SOLVER_ITERATIONS = 4;
+const WALL_RESTITUTION = 0.35;
+const WALL_FRICTION = 0.85;
 
 function detectMerges(balls, scale = 1) {
   const n = balls.length;
@@ -86,27 +88,31 @@ export function resolveCollisions({ balls, particles, width, height, centerX, ce
       }
     }
 
-    // Boundary bounces
+    // Boundary bounces with damped restitution to arrest endless pinball ricochets
     for (let i = 0; i < n; i++) {
       const b = balls[i];
       if (b.toRemove) continue;
       const r = b.radius;
       if (b.x - r < 0) {
         b.x = r;
-        b.vx = Math.abs(b.vx) * 0.65;
+        b.vx = Math.abs(b.vx) * WALL_RESTITUTION;
+        b.vy *= WALL_FRICTION;
         audioManager.playBounce();
       } else if (b.x + r > width) {
         b.x = width - r;
-        b.vx = -Math.abs(b.vx) * 0.65;
+        b.vx = -Math.abs(b.vx) * WALL_RESTITUTION;
+        b.vy *= WALL_FRICTION;
         audioManager.playBounce();
       }
       if (b.y - r < 0) {
         b.y = r;
-        b.vy = Math.abs(b.vy) * 0.65;
+        b.vy = Math.abs(b.vy) * WALL_RESTITUTION;
+        b.vx *= WALL_FRICTION;
         audioManager.playBounce();
       } else if (b.y + r > height - 10) {
         b.y = height - 10 - r;
-        b.vy = -Math.abs(b.vy) * 0.65;
+        b.vy = -Math.abs(b.vy) * WALL_RESTITUTION;
+        b.vx *= WALL_FRICTION;
         audioManager.playBounce();
       }
     }
