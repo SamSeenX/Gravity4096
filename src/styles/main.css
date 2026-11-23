@@ -1,6 +1,9 @@
 @import './tokens.css';
+@import './themePastel.css';
+@import './themeDark.css';
 @import './hud.css';
 @import './modal.css';
+@import './tutorial.css';
 
 * {
   margin: 0;
@@ -18,6 +21,7 @@ html, body {
   background-color: var(--bg-deep);
   font-family: var(--font-main);
   color: var(--text-main);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 #app {
@@ -38,6 +42,7 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   background-color: var(--bg-deep);
+  transition: background-color 0.25s ease;
 }
 
 .canvas-container {
