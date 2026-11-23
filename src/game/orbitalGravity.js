@@ -1,12 +1,12 @@
-const G_CENTER = 36.0;
-const SOFT_CENTER = 30;
-const G_MUTUAL = 0.09;
-const SOFT_MUTUAL = 24;
-const MAX_VELOCITY = 9.0;
+const G_CENTER = 21.0;
+const SOFT_CENTER = 40;
+const G_MUTUAL = 0.08;
+const SOFT_MUTUAL = 26;
+const MAX_VELOCITY = 8.5;
 
 export function applyGravityForces(balls, centerX, centerY, scale = 1) {
   const n = balls.length;
-  const coreRepelDist = 26 * scale;
+  const coreRepelDist = 28 * scale;
   const clusterZone = 180 * scale;
 
   for (let i = 0; i < n; i++) {
@@ -26,15 +26,15 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b.vx += nx * pull;
       b.vy += ny * pull;
 
-      // Gentle orbital drift that does not blow out kinetic energy
+      // Gentle orbital drift
       if (dist < clusterZone) {
-        b.vx += -ny * 0.018 * scale;
-        b.vy += nx * 0.018 * scale;
+        b.vx += -ny * 0.015 * scale;
+        b.vy += nx * 0.015 * scale;
       }
 
-      // Soft core buffer preventing singular collapse at exact center
+      // Soft core buffer
       if (dist < coreRepelDist) {
-        const repel = (1 - dist / coreRepelDist) * 0.55 * scale;
+        const repel = (1 - dist / coreRepelDist) * 0.45 * scale;
         b.vx -= nx * repel;
         b.vy -= ny * repel;
       }
@@ -63,8 +63,8 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b2.vy -= mny * mPull * (b.mass / 2);
     }
 
-    // Progressive viscous damping: higher drag near center so balls settle
-    const currentDrag = dist < clusterZone ? 0.945 : 0.985;
+    // Progressive viscous damping
+    const currentDrag = dist < clusterZone ? 0.948 : 0.985;
     b.vx *= currentDrag;
     b.vy *= currentDrag;
 

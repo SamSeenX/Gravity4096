@@ -1,8 +1,9 @@
 # CHANGELOG.md
 
-## [1.0.2] - 2026-11-23
+## [1.0.3] - 2026-11-23
+### Added
+- Created dedicated anime chibi sprite renderer in animeSprite.js featuring 2-tone cel shadows, cute cheek blush marks, glossy white bubble gleams, and plum sticker typography
+- Overhauled tier palette in tiers.js to the cozy anime pastel aesthetic (Sakura Pink, Peach Custard, Buttercup Mochi, Matcha Milk, Boba Sky, Lavender Cloud, Taro Dream)
+
 ### Changed
-- Implemented progressive core viscous damping (0.945) in the inner cluster zone so balls naturally gather and rest around the galactic core
-- Replaced active swirl thrust with gentle passive orbital drift (0.018) preventing endless orbital acceleration
-- Lowered initial launch speed from 13.5 to 9.5 for controlled, accurate cluster placement
-- Added contact energy absorption and lowered restitution to 0.12 so colliding bodies lock into a cohesive central cluster
+- Softened central gravity pull from 36.0 down to 21.0 and expanded core softening buffer to 40px in orbitalGravity.js and trajectory.js for a smooth, relaxed orbital glide

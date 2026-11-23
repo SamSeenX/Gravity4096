@@ -1,7 +1,7 @@
 import { TIERS } from '../config/tiers.js';
 
-const G_CENTER = 36.0;
-const SOFT_CENTER = 30;
+const G_CENTER = 21.0;
+const SOFT_CENTER = 40;
 const LAUNCH_SPEED = 9.5;
 
 export function calculateTrajectory({
@@ -35,7 +35,7 @@ export function calculateTrajectory({
   const radius = tier.radius * scale;
   const points = [{ x: simX, y: simY }];
   const MAX_STEPS = 36;
-  const coreRepelDist = 26 * scale;
+  const coreRepelDist = 28 * scale;
   const clusterZone = 180 * scale;
 
   for (let i = 0; i < MAX_STEPS; i++) {
@@ -53,18 +53,18 @@ export function calculateTrajectory({
       simVy += ny * pull;
 
       if (dist < clusterZone) {
-        simVx += -ny * 0.018 * scale;
-        simVy += nx * 0.018 * scale;
+        simVx += -ny * 0.015 * scale;
+        simVy += nx * 0.015 * scale;
       }
 
       if (dist < coreRepelDist) {
-        const repel = (1 - dist / coreRepelDist) * 0.55 * scale;
+        const repel = (1 - dist / coreRepelDist) * 0.45 * scale;
         simVx -= nx * repel;
         simVy -= ny * repel;
       }
     }
 
-    const currentDrag = dist < clusterZone ? 0.945 : 0.985;
+    const currentDrag = dist < clusterZone ? 0.948 : 0.985;
     simVx *= currentDrag;
     simVy *= currentDrag;
     simX += simVx;
