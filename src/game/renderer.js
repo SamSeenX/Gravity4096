@@ -20,7 +20,6 @@ export class Renderer {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, width, height);
 
-    // Deep cosmic background
     const bgGrad = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, width * 0.8);
     bgGrad.addColorStop(0, '#0f0c29');
     bgGrad.addColorStop(0.5, '#0d0d1e');
@@ -28,7 +27,6 @@ export class Renderer {
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Distant starfield
     for (let star of this.stars) {
       ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
       ctx.beginPath();
@@ -36,7 +34,6 @@ export class Renderer {
       ctx.fill();
     }
 
-    // Danger perimeter ring
     ctx.save();
     ctx.beginPath();
     ctx.arc(centerX, centerY, maxRadius, 0, Math.PI * 2);
@@ -56,8 +53,8 @@ export class Renderer {
     const ctx = this.ctx;
     ctx.save();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 6]);
+    ctx.lineWidth = 2.2;
+    ctx.setLineDash([6, 7]);
 
     ctx.beginPath();
     ctx.moveTo(trajectory.points[0].x, trajectory.points[0].y);
@@ -66,27 +63,56 @@ export class Renderer {
     }
     ctx.stroke();
 
-    // Target terminal reticle
     const last = trajectory.points[trajectory.points.length - 1];
     ctx.setLineDash([]);
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+    ctx.arc(last.x, last.y, 4.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
 
-  drawLauncher(originX, originY, nextSprite) {
+  drawLauncher(originX, originY, nextSprite, chargeStrength = 0.5, isAiming = false) {
     const ctx = this.ctx;
     ctx.save();
     ctx.translate(originX, originY);
 
-    // Muzzle glow ring
-    ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+    const gaugeRadius = 36;
+
+    // Static muzzle ring
+    ctx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(0, 0, 32, Math.PI, 0);
+    ctx.arc(0, 0, 30, Math.PI, 0);
     ctx.stroke();
+
+    // Oscillating strength meter gauge
+    if (isAiming) {
+      // Gauge background track
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(0, 0, gaugeRadius, Math.PI, 0);
+      ctx.stroke();
+
+      // Gauge active power arc
+      const powerColor = chargeStrength > 0.82 ? '#f472b6' : (chargeStrength > 0.58 ? '#fef08a' : '#86efac');
+      ctx.strokeStyle = powerColor;
+      ctx.lineWidth = 5.5;
+      ctx.shadowColor = powerColor;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(0, 0, gaugeRadius, Math.PI, Math.PI + chargeStrength * Math.PI);
+      ctx.stroke();
+
+      // Power percentage readout
+      ctx.shadowBlur = 0;
+      ctx.font = '700 11px "Outfit", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = powerColor;
+      ctx.fillText(`${Math.round(chargeStrength * 100)}%`, 0, 22);
+    }
 
     if (nextSprite) {
       ctx.drawImage(nextSprite.canvas, -nextSprite.offset, -nextSprite.offset);

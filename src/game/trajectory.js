@@ -2,7 +2,6 @@ import { TIERS } from '../config/tiers.js';
 
 const G_CENTER = 21.0;
 const SOFT_CENTER = 40;
-const LAUNCH_SPEED = 9.5;
 
 export function calculateTrajectory({
   originX,
@@ -14,7 +13,8 @@ export function calculateTrajectory({
   width,
   height,
   scale = 1,
-  tierIndex = 0
+  tierIndex = 0,
+  power = 0.7
 }) {
   let dx = targetX - originX;
   let dy = targetY - originY;
@@ -25,7 +25,8 @@ export function calculateTrajectory({
   const dirX = dx / len;
   const dirY = dy / len;
 
-  const speed = LAUNCH_SPEED * scale;
+  // Launch speed directly proportional to dynamic charge power (5.0 to 13.0)
+  const speed = (5.0 + power * 8.0) * scale;
   let simVx = dirX * speed;
   let simVy = dirY * speed;
   let simX = originX;
