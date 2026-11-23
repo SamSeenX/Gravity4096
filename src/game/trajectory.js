@@ -1,8 +1,8 @@
 import { TIERS } from '../config/tiers.js';
 
-const G_CENTER = 38.0;
-const SOFT_CENTER = 35;
-const SWIRL_DRIFT = 0.08;
+const G_CENTER = 36.0;
+const SOFT_CENTER = 30;
+const LAUNCH_SPEED = 9.5;
 
 export function calculateTrajectory({
   originX,
@@ -19,24 +19,24 @@ export function calculateTrajectory({
   let dx = targetX - originX;
   let dy = targetY - originY;
 
-  // Enforce upward launch angle from bottom
   if (dy > -15 * scale) dy = -15 * scale;
 
   const len = Math.hypot(dx, dy) || 1;
   const dirX = dx / len;
   const dirY = dy / len;
 
-  const launchSpeed = 13.5 * scale;
-  let simVx = dirX * launchSpeed;
-  let simVy = dirY * launchSpeed;
+  const speed = LAUNCH_SPEED * scale;
+  let simVx = dirX * speed;
+  let simVy = dirY * speed;
   let simX = originX;
   let simY = originY;
 
   const tier = TIERS[tierIndex] || TIERS[0];
   const radius = tier.radius * scale;
   const points = [{ x: simX, y: simY }];
-  const MAX_STEPS = 42;
-  const coreRepelDist = 34 * scale;
+  const MAX_STEPS = 36;
+  const coreRepelDist = 26 * scale;
+  const clusterZone = 180 * scale;
 
   for (let i = 0; i < MAX_STEPS; i++) {
     const cdx = centerX - simX;
@@ -51,22 +51,25 @@ export function calculateTrajectory({
       const ny = cdy / dist;
       simVx += nx * pull;
       simVy += ny * pull;
-      simVx += -ny * SWIRL_DRIFT * scale;
-      simVy += nx * SWIRL_DRIFT * scale;
+
+      if (dist < clusterZone) {
+        simVx += -ny * 0.018 * scale;
+        simVy += nx * 0.018 * scale;
+      }
 
       if (dist < coreRepelDist) {
-        const repelForce = (1 - dist / coreRepelDist) * 0.45 * scale;
-        simVx -= nx * repelForce;
-        simVy -= ny * repelForce;
+        const repel = (1 - dist / coreRepelDist) * 0.55 * scale;
+        simVx -= nx * repel;
+        simVy -= ny * repel;
       }
     }
 
-    simVx *= 0.992;
-    simVy *= 0.992;
+    const currentDrag = dist < clusterZone ? 0.945 : 0.985;
+    simVx *= currentDrag;
+    simVy *= currentDrag;
     simX += simVx;
     simY += simVy;
 
-    // Wall bounce simulation matching physics
     if (simX - radius < 0) {
       simX = radius;
       simVx = Math.abs(simVx) * 0.35;

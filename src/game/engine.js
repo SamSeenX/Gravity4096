@@ -68,7 +68,7 @@ export class Engine {
   handleShoot() {
     if (!this.canShoot || !this.currentTrajectory || store.getState().isGameOver) return;
     this.canShoot = false;
-    const speed = 13.5 * this.scale;
+    const speed = 9.5 * this.scale;
     const vx = this.currentTrajectory.launchDir.x * speed;
     const vy = this.currentTrajectory.launchDir.y * speed;
 

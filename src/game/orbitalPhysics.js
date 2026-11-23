@@ -6,8 +6,8 @@ import { haptics } from '../audio/haptics.js';
 import { applyGravityForces } from './orbitalGravity.js';
 
 const SOLVER_ITERATIONS = 4;
-const WALL_RESTITUTION = 0.35;
-const WALL_FRICTION = 0.85;
+const WALL_RESTITUTION = 0.30;
+const WALL_FRICTION = 0.80;
 
 function detectMerges(balls, scale = 1) {
   const n = balls.length;
@@ -28,8 +28,8 @@ function detectMerges(balls, scale = 1) {
       if (dx * dx + dy * dy <= contactDist * contactDist) {
         const targetX = (b1.x + b2.x) * 0.5;
         const targetY = (b1.y + b2.y) * 0.5;
-        const sharedVx = (b1.vx + b2.vx) * 0.45;
-        const sharedVy = (b1.vy + b2.vy) * 0.45;
+        const sharedVx = (b1.vx + b2.vx) * 0.35;
+        const sharedVy = (b1.vy + b2.vy) * 0.35;
         b1.startMerge(targetX, targetY, b1.tierIndex + 1, true, sharedVx, sharedVy, b2);
         b2.startMerge(targetX, targetY, b1.tierIndex + 1, false, sharedVx, sharedVy, b1);
         break;
@@ -73,12 +73,18 @@ export function resolveCollisions({ balls, particles, width, height, centerX, ce
         b2.x += nx * overlap * invM2 * 0.55;
         b2.y += ny * overlap * invM2 * 0.55;
 
+        // Contact damping: touching bodies transfer and absorb kinetic energy
+        b1.vx *= 0.96;
+        b1.vy *= 0.96;
+        b2.vx *= 0.96;
+        b2.vy *= 0.96;
+
         const rvx = b2.vx - b1.vx;
         const rvy = b2.vy - b1.vy;
         const velAlongNormal = rvx * nx + rvy * ny;
 
         if (velAlongNormal < 0) {
-          const restitution = 0.28;
+          const restitution = 0.12;
           const impulse = -(1 + restitution) * velAlongNormal / (1 / b1.mass + 1 / b2.mass);
           b1.vx -= (impulse / b1.mass) * nx;
           b1.vy -= (impulse / b1.mass) * ny;
@@ -88,7 +94,7 @@ export function resolveCollisions({ balls, particles, width, height, centerX, ce
       }
     }
 
-    // Boundary bounces with damped restitution to arrest endless pinball ricochets
+    // Boundary bounces
     for (let i = 0; i < n; i++) {
       const b = balls[i];
       if (b.toRemove) continue;
