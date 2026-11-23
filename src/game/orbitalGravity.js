@@ -1,14 +1,13 @@
-const G_CENTER = 38.0;
-const SOFT_CENTER = 35;
-const SWIRL_DRIFT = 0.08;
-const G_MUTUAL = 0.045;
-const SOFT_MUTUAL = 28;
-const DRAG = 0.992;
-const MAX_VELOCITY = 14;
+const G_CENTER = 36.0;
+const SOFT_CENTER = 30;
+const G_MUTUAL = 0.09;
+const SOFT_MUTUAL = 24;
+const MAX_VELOCITY = 9.0;
 
 export function applyGravityForces(balls, centerX, centerY, scale = 1) {
   const n = balls.length;
-  const coreRepelDist = 34 * scale;
+  const coreRepelDist = 26 * scale;
+  const clusterZone = 180 * scale;
 
   for (let i = 0; i < n; i++) {
     const b = balls[i];
@@ -27,19 +26,21 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b.vx += nx * pull;
       b.vy += ny * pull;
 
-      // Tangential galaxy swirl
-      b.vx += -ny * SWIRL_DRIFT * scale;
-      b.vy += nx * SWIRL_DRIFT * scale;
+      // Gentle orbital drift that does not blow out kinetic energy
+      if (dist < clusterZone) {
+        b.vx += -ny * 0.018 * scale;
+        b.vy += nx * 0.018 * scale;
+      }
 
-      // Gentle core repulsion to prevent singular dead-center collapse
+      // Soft core buffer preventing singular collapse at exact center
       if (dist < coreRepelDist) {
-        const repelForce = (1 - dist / coreRepelDist) * 0.45 * scale;
-        b.vx -= nx * repelForce;
-        b.vy -= ny * repelForce;
+        const repel = (1 - dist / coreRepelDist) * 0.55 * scale;
+        b.vx -= nx * repel;
+        b.vy -= ny * repel;
       }
     }
 
-    // Mutual soft gravity between celestial bodies
+    // Mutual gravitational attraction pulling bodies into a cluster
     for (let j = i + 1; j < n; j++) {
       const b2 = balls[j];
       if (b2.toRemove || b2.isMerging) continue;
@@ -62,10 +63,18 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b2.vy -= mny * mPull * (b.mass / 2);
     }
 
-    // Atmospheric orbit drag and velocity clamping
-    b.vx *= DRAG;
-    b.vy *= DRAG;
+    // Progressive viscous damping: higher drag near center so balls settle
+    const currentDrag = dist < clusterZone ? 0.945 : 0.985;
+    b.vx *= currentDrag;
+    b.vy *= currentDrag;
+
+    // Settle resting bodies in the central cluster
     const speed = Math.hypot(b.vx, b.vy);
+    if (dist < 120 * scale && speed < 0.35 * scale) {
+      b.vx *= 0.88;
+      b.vy *= 0.88;
+    }
+
     if (speed > MAX_VELOCITY * scale) {
       b.vx = (b.vx / speed) * MAX_VELOCITY * scale;
       b.vy = (b.vy / speed) * MAX_VELOCITY * scale;
