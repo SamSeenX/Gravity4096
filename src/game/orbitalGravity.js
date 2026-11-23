@@ -2,7 +2,7 @@ const G_CENTER = 21.0;
 const SOFT_CENTER = 40;
 const G_MUTUAL = 0.08;
 const SOFT_MUTUAL = 26;
-const MAX_VELOCITY = 12.5;
+const MAX_VELOCITY = 13.5;
 
 export function applyGravityForces(balls, centerX, centerY, scale = 1) {
   const n = balls.length;
@@ -63,8 +63,8 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b2.vy -= mny * mPull * (b.mass / 2);
     }
 
-    // Launch transit grace period: preserve initial momentum across the screen
-    const isTransit = b.age < 18;
+    // Launch transit grace period
+    const isTransit = b.age < 20;
     const currentDrag = (dist < clusterZone && !isTransit) ? 0.948 : 0.985;
     b.vx *= currentDrag;
     b.vy *= currentDrag;
