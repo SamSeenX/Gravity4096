@@ -4,8 +4,8 @@ import { Renderer } from './renderer.js';
 import { InputHandler } from './input.js';
 import { FloatingScore } from './particle.js';
 import { resolveCollisions } from './orbitalPhysics.js';
-import { calculateTrajectory } from './trajectory.js';
-import { getRandomSpawnTier, checkDangerLimit } from './spawner.js';
+import { updateEngineCharge } from './engineCharge.js';
+import { getRandomSpawnTier, updateDangerStatus } from './spawner.js';
 import { spriteCache } from './spriteCache.js';
 import { calculateEngineLayout } from './engineLayout.js';
 import { TIERS } from '../config/tiers.js';
@@ -27,6 +27,11 @@ export class Engine {
     this.dangerTimer = 0;
     this.isWarning = false;
     this.canShoot = true;
+
+    this.isAiming = false;
+    this.aimPos = null;
+    this.chargeTimer = 0;
+    this.chargeStrength = 0.5;
 
     this.initLayout();
     this.initInput();
@@ -51,26 +56,22 @@ export class Engine {
 
   handleAim(x, y) {
     if (!this.canShoot || store.getState().isGameOver) return;
-    this.currentTrajectory = calculateTrajectory({
-      originX: this.originX,
-      originY: this.originY,
-      targetX: x,
-      targetY: y,
-      centerX: this.centerX,
-      centerY: this.centerY,
-      width: this.width,
-      height: this.height,
-      scale: this.scale,
-      tierIndex: this.nextTier
-    });
+    this.isAiming = true;
+    this.aimPos = { x, y };
   }
 
   handleShoot() {
-    if (!this.canShoot || !this.currentTrajectory || store.getState().isGameOver) return;
+    if (!this.canShoot || !this.currentTrajectory || store.getState().isGameOver) {
+      this.isAiming = false;
+      this.chargeTimer = 0;
+      return;
+    }
+
     this.canShoot = false;
-    const speed = 9.5 * this.scale;
-    const vx = this.currentTrajectory.launchDir.x * speed;
-    const vy = this.currentTrajectory.launchDir.y * speed;
+    this.isAiming = false;
+    const launchSpeed = (5.0 + this.chargeStrength * 8.0) * this.scale;
+    const vx = this.currentTrajectory.launchDir.x * launchSpeed;
+    const vy = this.currentTrajectory.launchDir.y * launchSpeed;
 
     this.balls.push(new Ball(this.originX, this.originY, this.nextTier, false, vx, vy, this.scale));
     audioManager.playLaunch();
@@ -78,6 +79,7 @@ export class Engine {
 
     this.nextTier = getRandomSpawnTier(store.getState().highestTier);
     this.currentTrajectory = null;
+    this.chargeTimer = 0;
 
     setTimeout(() => {
       this.canShoot = true;
@@ -94,6 +96,7 @@ export class Engine {
   update() {
     if (store.getState().isGameOver) return;
 
+    updateEngineCharge(this);
     this.galaxyCore.update();
     for (let b of this.balls) b.update(this.width, this.height);
 
@@ -114,27 +117,7 @@ export class Engine {
     for (let fs of this.floatingScores) fs.update();
     this.floatingScores = this.floatingScores.filter(fs => !fs.toRemove);
 
-    const { isOverflowing } = checkDangerLimit(
-      this.balls,
-      this.centerX,
-      this.centerY,
-      this.maxOrbitRadius,
-      this.originX,
-      this.originY
-    );
-
-    this.isWarning = isOverflowing;
-    if (isOverflowing) {
-      this.dangerTimer++;
-      if (this.dangerTimer % 30 === 0) haptics.danger();
-      if (this.dangerTimer > 180) {
-        store.setGameOver(true);
-        audioManager.playGameOver();
-        haptics.gameOver();
-      }
-    } else {
-      this.dangerTimer = Math.max(0, this.dangerTimer - 2);
-    }
+    updateDangerStatus(this);
   }
 
   render() {
@@ -149,7 +132,7 @@ export class Engine {
 
     this.galaxyCore.draw(this.ctx);
 
-    if (this.currentTrajectory && this.canShoot) {
+    if (this.currentTrajectory && this.canShoot && this.isAiming) {
       const tier = TIERS[this.nextTier] || TIERS[0];
       this.renderer.drawTrajectory(this.currentTrajectory, tier.color);
     }
@@ -160,7 +143,7 @@ export class Engine {
 
     const nextTierConfig = TIERS[this.nextTier] || TIERS[0];
     const nextSprite = spriteCache.getSprite(this.nextTier, nextTierConfig.radius * this.scale);
-    this.renderer.drawLauncher(this.originX, this.originY, nextSprite);
+    this.renderer.drawLauncher(this.originX, this.originY, nextSprite, this.chargeStrength, this.isAiming);
   }
 
   startLoop() {
@@ -179,6 +162,8 @@ export class Engine {
     this.dangerTimer = 0;
     this.isWarning = false;
     this.canShoot = true;
+    this.isAiming = false;
+    this.chargeTimer = 0;
     this.currentTrajectory = null;
     this.nextTier = getRandomSpawnTier(0);
     store.reset();
