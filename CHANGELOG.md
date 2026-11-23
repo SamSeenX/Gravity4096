@@ -1,10 +1,7 @@
 # CHANGELOG.md
 
-## [1.1.0] - 2026-11-23
-### Added
-- Dynamic Combo Multiplier system with in-playfield floating combo pill (2x, 3x, 4x) and rising audio pitches
-- Milestone celebration modal with firework confetti canvas and victory sound for unlocking tiers 512, 1024, 2048, and 4096
-- Golden crown High Score celebration modal triggering when beating all-time record
-- Interactive phantom hand tutorial displaying on first session to demonstrate charge aiming and shooting
-- Dual theme switcher: toggle between cozy anime Pastel (🌸) and Cyberpunk Dark Neon (⚡) with live 3D gloss and chibi sprite regeneration
-- In-game pause toggle with frosted overlay and full state session restoration across page refreshes
+## [1.1.1] - 2026-11-23
+### Changed
+- Updated anime pastel theme to a cozy medium-dark twilight plum backdrop (#1d132b to #241638) across the vertical game viewport and outer ambient background
+- Re-styled pastel HUD pills and modals with frosted plum glass and soft sakura pink borders
+- Adaptive canvas background in renderer.js renders a rich twilight purple starfield (#321d45 to #150c20) when in pastel mode for superior ball contrast

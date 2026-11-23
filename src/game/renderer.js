@@ -20,26 +20,41 @@ export class Renderer {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, width, height);
 
-    const bgGrad = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, width * 0.8);
-    bgGrad.addColorStop(0, '#0f0c29');
-    bgGrad.addColorStop(0.5, '#0d0d1e');
-    bgGrad.addColorStop(1, '#05050a');
+    const isPastel = document.documentElement.getAttribute('data-theme') !== 'dark';
+
+    // Adaptive background gradient
+    const bgGrad = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, width * 0.85);
+    if (isPastel) {
+      bgGrad.addColorStop(0, '#321d45');
+      bgGrad.addColorStop(0.5, '#221433');
+      bgGrad.addColorStop(1, '#150c20');
+    } else {
+      bgGrad.addColorStop(0, '#0f0c29');
+      bgGrad.addColorStop(0.5, '#0d0d1e');
+      bgGrad.addColorStop(1, '#05050a');
+    }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
+    // Starfield
     for (let star of this.stars) {
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.fillStyle = isPastel
+        ? `rgba(254, 240, 245, ${star.alpha})`
+        : `rgba(255, 255, 255, ${star.alpha})`;
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // Danger perimeter ring
     ctx.save();
     ctx.beginPath();
     ctx.arc(centerX, centerY, maxRadius, 0, Math.PI * 2);
     ctx.setLineDash([8, 10]);
     ctx.lineWidth = isWarning ? 2.5 : 1.2;
-    ctx.strokeStyle = isWarning ? 'rgba(239, 68, 68, 0.75)' : 'rgba(99, 102, 241, 0.22)';
+    ctx.strokeStyle = isWarning
+      ? 'rgba(239, 68, 68, 0.8)'
+      : (isPastel ? 'rgba(244, 114, 182, 0.28)' : 'rgba(99, 102, 241, 0.22)');
     if (isWarning) {
       ctx.shadowColor = '#ef4444';
       ctx.shadowBlur = 10;
