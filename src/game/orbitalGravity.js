@@ -2,7 +2,7 @@ const G_CENTER = 21.0;
 const SOFT_CENTER = 40;
 const G_MUTUAL = 0.08;
 const SOFT_MUTUAL = 26;
-const MAX_VELOCITY = 8.5;
+const MAX_VELOCITY = 16.5;
 
 export function applyGravityForces(balls, centerX, centerY, scale = 1) {
   const n = balls.length;
@@ -63,14 +63,15 @@ export function applyGravityForces(balls, centerX, centerY, scale = 1) {
       b2.vy -= mny * mPull * (b.mass / 2);
     }
 
-    // Progressive viscous damping
-    const currentDrag = dist < clusterZone ? 0.948 : 0.985;
+    // Launch transit grace period: preserve initial momentum across the screen
+    const isTransit = b.age < 26;
+    const currentDrag = (dist < clusterZone && !isTransit) ? 0.948 : 0.985;
     b.vx *= currentDrag;
     b.vy *= currentDrag;
 
-    // Settle resting bodies in the central cluster
+    // Settle resting bodies after transit phase
     const speed = Math.hypot(b.vx, b.vy);
-    if (dist < 120 * scale && speed < 0.35 * scale) {
+    if (!isTransit && dist < 120 * scale && speed < 0.35 * scale) {
       b.vx *= 0.88;
       b.vy *= 0.88;
     }

@@ -1,8 +1,8 @@
 # CHANGELOG.md
 
-## [1.0.4] - 2026-11-23
-### Added
-- Oscillating strength meter module in engineCharge.js providing smooth sine wave power scaling between 35% and 100%
-- Curved pastel power gauge in renderer.js hugging the launcher muzzle with live color shifting from matcha green to sakura pink and live percentage readout
-- Dynamic launch velocity scaling in trajectory.js and engine.js directly proportional to charge strength (5.0 to 13.0 speed)
-- Live trajectory curve preview expanding and contracting dynamically while holding aim
+## [1.0.5] - 2026-11-23
+### Changed
+- Increased maximum launch velocity from 13.0 to 16.5 at peak strength in engine.js and trajectory.js
+- Raised velocity ceiling in orbitalGravity.js to 16.5 to support high-power orbital penetration
+- Introduced a 25-frame launch transit grace period allowing full-power shots to travel cleanly across to the far side of the cluster without premature core braking
+- Extended trajectory path simulation from 36 to 48 steps to accurately project the full arc around the back of the center core

@@ -25,8 +25,8 @@ export function calculateTrajectory({
   const dirX = dx / len;
   const dirY = dy / len;
 
-  // Launch speed directly proportional to dynamic charge power (5.0 to 13.0)
-  const speed = (5.0 + power * 8.0) * scale;
+  // Launch speed scalable from 5.0 up to 16.5 at peak charge
+  const speed = (5.0 + power * 11.5) * scale;
   let simVx = dirX * speed;
   let simVy = dirY * speed;
   let simX = originX;
@@ -35,7 +35,7 @@ export function calculateTrajectory({
   const tier = TIERS[tierIndex] || TIERS[0];
   const radius = tier.radius * scale;
   const points = [{ x: simX, y: simY }];
-  const MAX_STEPS = 36;
+  const MAX_STEPS = 48;
   const coreRepelDist = 28 * scale;
   const clusterZone = 180 * scale;
 
@@ -65,7 +65,8 @@ export function calculateTrajectory({
       }
     }
 
-    const currentDrag = dist < clusterZone ? 0.948 : 0.985;
+    const isTransit = i < 26;
+    const currentDrag = (dist < clusterZone && !isTransit) ? 0.948 : 0.985;
     simVx *= currentDrag;
     simVy *= currentDrag;
     simX += simVx;

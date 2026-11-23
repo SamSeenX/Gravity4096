@@ -69,7 +69,7 @@ export class Engine {
 
     this.canShoot = false;
     this.isAiming = false;
-    const launchSpeed = (5.0 + this.chargeStrength * 8.0) * this.scale;
+    const launchSpeed = (5.0 + this.chargeStrength * 11.5) * this.scale;
     const vx = this.currentTrajectory.launchDir.x * launchSpeed;
     const vy = this.currentTrajectory.launchDir.y * launchSpeed;
 
