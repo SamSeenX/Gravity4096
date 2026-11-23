@@ -1,8 +1,7 @@
 # CHANGELOG.md
 
-## [1.0.5] - 2026-11-23
+## [1.0.6] - 2026-11-23
 ### Changed
-- Increased maximum launch velocity from 13.0 to 16.5 at peak strength in engine.js and trajectory.js
-- Raised velocity ceiling in orbitalGravity.js to 16.5 to support high-power orbital penetration
-- Introduced a 25-frame launch transit grace period allowing full-power shots to travel cleanly across to the far side of the cluster without premature core braking
-- Extended trajectory path simulation from 36 to 48 steps to accurately project the full arc around the back of the center core
+- Scaled maximum launch speed down to 12.0 (approx 70% of previous peak) for balanced control and smooth orbital entry
+- Lowered physics velocity ceiling in orbitalGravity.js to 12.5 and transit frames to 18
+- Documented mutual N-body attraction parameters in orbitalGravity.js
