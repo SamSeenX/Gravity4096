@@ -1,14 +1,14 @@
 import { GalaxyCore } from './galaxyCore.js';
 import { Renderer } from './renderer.js';
 import { InputHandler } from './input.js';
-import { FloatingScore } from './particle.js';
 import { resolveCollisions } from './orbitalPhysics.js';
 import { updateEngineCharge } from './engineCharge.js';
 import { executeShoot } from './engineShoot.js';
+import { handleEngineMerge } from './engineMerge.js';
 import { getRandomSpawnTier, updateDangerStatus } from './spawner.js';
 import { spriteCache } from './spriteCache.js';
 import { calculateEngineLayout } from './engineLayout.js';
-import { saveGameState, restoreGameState, clearSavedGameState } from './stateStorage.js';
+import { restoreGameState, clearSavedGameState } from './stateStorage.js';
 import { TIERS } from '../config/tiers.js';
 import { store } from '../core/store.js';
 
@@ -33,6 +33,11 @@ export class Engine {
     this.chargeTimer = 0;
     this.chargeStrength = 0.5;
 
+    this.lastMergeTime = 0;
+    this.combo = 1;
+    this.hasRecordedNewBest = false;
+    this.initialBestScore = store.getState().bestScore;
+
     this.initLayout();
     this.initInput();
     this.initSessionSync();
@@ -51,10 +56,6 @@ export class Engine {
     if (!hasRestored) {
       this.nextTier = getRandomSpawnTier(store.getState().highestTier);
     }
-    window.addEventListener('beforeunload', () => saveGameState(this));
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) saveGameState(this);
-    });
   }
 
   initInput() {
@@ -67,7 +68,6 @@ export class Engine {
 
   togglePause() {
     this.isPaused = !this.isPaused;
-    if (this.isPaused) saveGameState(this);
     return this.isPaused;
   }
 
@@ -75,14 +75,6 @@ export class Engine {
     if (!this.canShoot || store.getState().isGameOver || this.isPaused) return;
     this.isAiming = true;
     this.aimPos = { x, y };
-  }
-
-  handleMerge(tierIndex, x, y) {
-    const points = (TIERS[tierIndex].value || 2) * 2;
-    store.addScore(points);
-    store.setHighestTier(tierIndex + 1);
-    this.floatingScores.push(new FloatingScore(x, y, `+${points}`, TIERS[tierIndex].color, this.scale));
-    saveGameState(this);
   }
 
   update() {
@@ -100,7 +92,7 @@ export class Engine {
       centerX: this.centerX,
       centerY: this.centerY,
       scale: this.scale,
-      onMerge: (tier, x, y) => this.handleMerge(tier, x, y)
+      onMerge: (tier, x, y) => handleEngineMerge(this, tier, x, y)
     });
 
     for (let p of this.particles) p.update();
@@ -161,6 +153,8 @@ export class Engine {
     this.isPaused = false;
     this.isAiming = false;
     this.chargeTimer = 0;
+    this.combo = 1;
+    this.hasRecordedNewBest = false;
     this.currentTrajectory = null;
     this.nextTier = getRandomSpawnTier(0);
     clearSavedGameState();

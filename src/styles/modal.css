@@ -18,7 +18,18 @@
   pointer-events: none;
 }
 
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 52;
+}
+
 .modal-card {
+  position: relative;
+  z-index: 55;
   width: 85%;
   max-width: 340px;
   padding: 28px 20px;
@@ -33,12 +44,22 @@
   gap: 16px;
 }
 
+.modal-emoji {
+  font-size: 40px;
+  margin-bottom: -6px;
+  animation: bounce 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+
 .modal-title {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: 1px;
-  color: var(--danger);
-  text-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  color: var(--accent-gold);
 }
 
 .modal-subtitle {
@@ -47,15 +68,8 @@
   line-height: 1.4;
 }
 
-.modal-stats {
-  display: flex;
-  width: 100%;
-  gap: 10px;
-  margin-top: 4px;
-}
-
 .stat-box {
-  flex: 1;
+  width: 100%;
   padding: 10px;
   background: rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-sm);

@@ -1,6 +1,7 @@
 import { store } from '../core/store.js';
 import { eventBus } from '../core/eventBus.js';
 import { audioManager } from '../audio/sound.js';
+import { themeManager } from '../core/themeManager.js';
 
 export class HUD {
   constructor(container, { onReset, onTogglePause }) {
@@ -11,6 +12,7 @@ export class HUD {
     this.bestEl = null;
     this.muteBtn = null;
     this.pauseBtn = null;
+    this.themeBtn = null;
     this.render();
     this.bind();
   }
@@ -29,6 +31,9 @@ export class HUD {
           </div>
         </div>
         <div class="hud-right">
+          <button class="icon-btn" id="hudThemeBtn" aria-label="Toggle Theme" title="Theme">
+            ${themeManager.getThemeIcon()}
+          </button>
           <button class="icon-btn" id="hudMuteBtn" aria-label="Toggle Sound" title="Sound">
             🔊
           </button>
@@ -46,6 +51,7 @@ export class HUD {
     this.bestEl = this.container.querySelector('#hudBest');
     this.muteBtn = this.container.querySelector('#hudMuteBtn');
     this.pauseBtn = this.container.querySelector('#hudPauseBtn');
+    this.themeBtn = this.container.querySelector('#hudThemeBtn');
   }
 
   bind() {
@@ -54,8 +60,16 @@ export class HUD {
       if (this.bestEl) this.bestEl.textContent = bestScore;
     });
 
-    const resetBtn = this.container.querySelector('#hudResetBtn');
-    resetBtn?.addEventListener('click', () => {
+    eventBus.on('theme:changed', ({ icon }) => {
+      if (this.themeBtn) this.themeBtn.textContent = icon;
+    });
+
+    this.themeBtn?.addEventListener('click', () => {
+      themeManager.toggleTheme();
+    });
+
+    this.resetBtn = this.container.querySelector('#hudResetBtn');
+    this.resetBtn?.addEventListener('click', () => {
       if (this.onReset) this.onReset();
     });
 

@@ -1,5 +1,7 @@
 const STORAGE_KEY_BEST = 'gravity4096_best';
 const STORAGE_KEY_STATE = 'gravity4096_saved_state';
+const STORAGE_KEY_THEME = 'gravity4096_theme';
+const STORAGE_KEY_TUTORIAL = 'gravity4096_tutorial';
 
 export const storage = {
   getBestScore() {
@@ -14,6 +16,34 @@ export const storage = {
   setBestScore(score) {
     try {
       localStorage.setItem(STORAGE_KEY_BEST, score.toString());
+    } catch {}
+  },
+
+  getTheme() {
+    try {
+      return localStorage.getItem(STORAGE_KEY_THEME) || 'pastel';
+    } catch {
+      return 'pastel';
+    }
+  },
+
+  setTheme(theme) {
+    try {
+      localStorage.setItem(STORAGE_KEY_THEME, theme);
+    } catch {}
+  },
+
+  getTutorialSeen() {
+    try {
+      return localStorage.getItem(STORAGE_KEY_TUTORIAL) === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  setTutorialSeen() {
+    try {
+      localStorage.setItem(STORAGE_KEY_TUTORIAL, 'true');
     } catch {}
   },
 
