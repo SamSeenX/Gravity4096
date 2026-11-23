@@ -13,8 +13,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const engine = new Engine(canvas);
 
-  new HUD(hudContainer, () => {
-    engine.reset();
+  new HUD(hudContainer, {
+    onReset: () => engine.reset(),
+    onTogglePause: () => engine.togglePause()
   });
 
   new GameOverModal(viewport, () => {

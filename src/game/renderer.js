@@ -78,17 +78,13 @@ export class Renderer {
     ctx.translate(originX, originY);
 
     const gaugeRadius = 36;
-
-    // Static muzzle ring
     ctx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(0, 0, 30, Math.PI, 0);
     ctx.stroke();
 
-    // Oscillating strength meter gauge
     if (isAiming) {
-      // Gauge background track
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.lineWidth = 5;
       ctx.lineCap = 'round';
@@ -96,7 +92,6 @@ export class Renderer {
       ctx.arc(0, 0, gaugeRadius, Math.PI, 0);
       ctx.stroke();
 
-      // Gauge active power arc
       const powerColor = chargeStrength > 0.82 ? '#f472b6' : (chargeStrength > 0.58 ? '#fef08a' : '#86efac');
       ctx.strokeStyle = powerColor;
       ctx.lineWidth = 5.5;
@@ -106,7 +101,6 @@ export class Renderer {
       ctx.arc(0, 0, gaugeRadius, Math.PI, Math.PI + chargeStrength * Math.PI);
       ctx.stroke();
 
-      // Power percentage readout
       ctx.shadowBlur = 0;
       ctx.font = '700 11px "Outfit", system-ui, sans-serif';
       ctx.textAlign = 'center';
@@ -117,6 +111,22 @@ export class Renderer {
     if (nextSprite) {
       ctx.drawImage(nextSprite.canvas, -nextSprite.offset, -nextSprite.offset);
     }
+    ctx.restore();
+  }
+
+  drawPauseOverlay(width, height, centerX, centerY) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = 'rgba(5, 5, 10, 0.65)';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = '800 28px "Outfit", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#c084fc';
+    ctx.shadowBlur = 12;
+    ctx.fillText('PAUSED', centerX, centerY);
     ctx.restore();
   }
 }

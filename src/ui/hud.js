@@ -1,15 +1,16 @@
 import { store } from '../core/store.js';
 import { eventBus } from '../core/eventBus.js';
 import { audioManager } from '../audio/sound.js';
-import { storage } from '../core/storage.js';
 
 export class HUD {
-  constructor(container, onReset) {
+  constructor(container, { onReset, onTogglePause }) {
     this.container = container;
     this.onReset = onReset;
+    this.onTogglePause = onTogglePause;
     this.scoreEl = null;
     this.bestEl = null;
     this.muteBtn = null;
+    this.pauseBtn = null;
     this.render();
     this.bind();
   }
@@ -31,8 +32,8 @@ export class HUD {
           <button class="icon-btn" id="hudMuteBtn" aria-label="Toggle Sound" title="Sound">
             🔊
           </button>
-          <button class="icon-btn" id="hudBackupBtn" aria-label="Backup Score" title="Save Backup">
-            💾
+          <button class="icon-btn" id="hudPauseBtn" aria-label="Pause Game" title="Pause">
+            ⏸️
           </button>
           <button class="icon-btn" id="hudResetBtn" aria-label="Restart Game" title="Restart">
             🔄
@@ -44,6 +45,7 @@ export class HUD {
     this.scoreEl = this.container.querySelector('#hudScore');
     this.bestEl = this.container.querySelector('#hudBest');
     this.muteBtn = this.container.querySelector('#hudMuteBtn');
+    this.pauseBtn = this.container.querySelector('#hudPauseBtn');
   }
 
   bind() {
@@ -62,9 +64,11 @@ export class HUD {
       this.muteBtn.textContent = isMuted ? '🔇' : '🔊';
     });
 
-    const backupBtn = this.container.querySelector('#hudBackupBtn');
-    backupBtn?.addEventListener('click', () => {
-      storage.exportBackup();
+    this.pauseBtn?.addEventListener('click', () => {
+      if (this.onTogglePause) {
+        const isPaused = this.onTogglePause();
+        this.pauseBtn.textContent = isPaused ? '▶️' : '⏸️';
+      }
     });
   }
 }

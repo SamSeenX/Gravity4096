@@ -1,6 +1,10 @@
 # CHANGELOG.md
 
-## [1.0.7] - 2026-11-23
-### Changed
-- Increased maximum launch speed by 10% (from 12.0 to 13.2) in engine.js and trajectory.js for sweet-spot orbital reach
-- Adjusted physics velocity ceiling to 13.5 and transit frames to 20 in orbitalGravity.js
+## [1.0.8] - 2026-11-23
+### Added
+- Dedicated Pause toggle button (⏸️/▶️) in HUD with frosted pause overlay
+- Full session state persistence in stateStorage.js: active balls, coordinates, velocities, score, and next tier persist to localStorage across browser refreshes
+- Automatic rehydration of in-progress games on page load
+
+### Removed
+- Removed manual backup button (💾) from the HUD to declutter top controls
